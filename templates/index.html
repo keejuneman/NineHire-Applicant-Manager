@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NineHire Applicant Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5f6fa;
+            --border-color: #e1e4e8;
+            --hover-color: #e8f0fe;
+            --text-color: #2c3e50;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: var(--text-color);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        .container {
+            margin-top: 2rem;
+            max-width: 1800px;
+            padding-left: 2rem;
+            padding-right: 2rem;
+            margin-left: auto;
+            margin-right: auto;
+            overflow-x: hidden;
+        }
+
+        .row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .page-title {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+            height: calc(100vh - 150px);
+            overflow-y: auto;
+        }
+
+        .card-body {
+            padding: 2rem;
+            padding-left: 1.5rem;
+            padding-right: 0rem;
+        }
+
+        .card-title {
+            color: var(--text-color);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-control {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+        }
+
+        .question-list, .selected-questions {
+            height: calc(100vh - 475px);
+            overflow-y: auto;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            background-color: white;
+        }
+
+        .column-title {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .column-title h6 {
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .question-item, .selected-question-item {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            background-color: var(--secondary-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .question-item:hover, .selected-question-item:hover {
+            background-color: var(--hover-color);
+            transform: translateY(-1px);
+        }
+
+        .selected-question-item {
+            background-color: #e8f0fe;
+            border-color: var(--primary-color);
+        }
+
+        .move-buttons {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 0 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #357abd;
+            border-color: #357abd;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner-border {
+            color: var(--primary-color);
+        }
+
+        .table {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 0;
+            min-width: 100%;
+            table-layout: fixed;
+        }
+
+        .table thead th {
+            position: sticky;
+            top: 0;
+            background-color: var(--secondary-color);
+            border-bottom: 2px solid var(--border-color);
+            color: var(--text-color);
+            font-weight: 600;
+            padding: 1rem;
+            z-index: 1;
+            min-width: 150px;
+            max-width: 200px;
+            white-space: normal;
+            word-wrap: break-word;
+            height: 60px;
+            vertical-align: middle;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            min-width: 150px;
+            max-width: 200px;
+            white-space: normal;
+            word-wrap: break-word;
+            height: 60px;
+            overflow: visible;
+        }
+
+        .table tbody tr {
+            height: 60px;
+        }
+
+        .table tbody tr:hover {
+            background-color: var(--hover-color);
+        }
+
+        .table a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            word-wrap: break-word;
+            display: block;
+            height: 100%;
+        }
+
+        .table a:hover {
+            text-decoration: underline;
+        }
+
+        .section-title {
+            color: var(--text-color);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        /* 스크롤바 스타일링 */
+        .question-list::-webkit-scrollbar,
+        .selected-questions::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .question-list::-webkit-scrollbar-track,
+        .selected-questions::-webkit-scrollbar-track {
+            background: var(--secondary-color);
+            border-radius: 4px;
+        }
+
+        .question-list::-webkit-scrollbar-thumb,
+        .selected-questions::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+
+        .question-list::-webkit-scrollbar-thumb:hover,
+        .selected-questions::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+
+        .table-responsive {
+            height: calc(100vh - 200px);
+            overflow-y: auto;
+            overflow-x: auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            padding: 1rem;
+        }
+
+        .right-container {
+            height: calc(100vh - 150px);
+            display: flex;
+            flex-direction: column;
+            margin-top: 0;
+            padding-top: 0;
+        }
+
+        .right-container .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+
+        .right-container .applicant-count {
+            margin-bottom: 1rem;
+            padding-top: 0;
+        }
+
+        .col-md-8 {
+            padding-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="mb-0"><Strong>NineHire Applicant Manager</Strong></h1>
+            <div class="applicant-count">
+                <span class="badge bg-primary">총 <span id="totalApplicants">0</span>명</span>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- 왼쪽 컨트롤 패널 -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Job ID</h5>
+                        <div class="mb-3 d-flex align-items-center gap-2">
+                            <input type="text" id="jobIdInput" class="form-control" placeholder="Please enter Job ID" style="max-width: 210px;">
+                            <button class="btn btn-primary btn-sm" onclick="openSaveModal()">SAVE</button>
+                            <button class="btn btn-secondary btn-sm" onclick="openLoadModal()">LOAD</button>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6>Column Select</h6>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="column-title">
+                                        <h6 class="text-muted">Available Fields</h6>
+                                    </div>
+                                    <div id="availableQuestions" class="question-list">
+                                        <!-- 사용 가능한 질문들이 여기에 동적으로 추가됩니다 -->
+                                    </div>
+                                    <button class="btn btn-secondary btn-sm w-100 mt-2" onclick="addEmptyColumn()">Add Empty Column</button>
+                                </div>
+                                <div class="col-md-1">
+                                    <!-- 중앙 영역은 비워둡니다 -->
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="column-title">
+                                        <h6 class="text-muted">Selected Fields<br> (Displayed in order)</h6>
+                                    </div>
+                                    <div id="selectedQuestions" class="selected-questions">
+                                        <!-- 선택된 질문들이 여기에 동적으로 추가됩니다 -->
+                                    </div>
+                                    <button id="fetchData" class="btn btn-primary w-100 mt-2" disabled>Data Load</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>Custom Column Builder</h6>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="column-title">
+                                        <h6 class="text-muted">Available Fields</h6>
+                                    </div>
+                                    <div id="availableFields" class="question-list">
+                                        <!-- 사용 가능한 필드들이 여기에 동적으로 추가됩니다 -->
+                                    </div>
+                                </div>
+                                <div class="col-md-1 d-flex flex-column justify-content-center align-items-center">
+                                    <div class="move-buttons">
+                                        <!-- <button class="btn btn-primary btn-sm w-100 mb-2" onclick="addToCustomBuilder()">←→</button> -->
+                                        <!-- <button class="btn btn-primary btn-sm w-100" onclick="removeFromCustomBuilder()"></button> -->
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="column-title">
+                                        <h6 class="text-muted">Custom Column Fields</h6>
+                                    </div>
+                                    <div id="customBuilderFields" class="question-list">
+                                        <!-- 커스텀 컬럼에 사용할 필드들이 여기에 동적으로 추가됩니다 -->
+                                    </div>
+                                    <div class="mt-2">
+                                        <input type="text" id="customColumnName" class="form-control mb-2" placeholder="Custom Column Name">
+                                        <button class="btn btn-primary btn-sm w-100" onclick="createCustomColumn()">Create Custom Column</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 오른쪽 결과 패널 -->
+            <div class="col-md-8">
+                <div class="right-container">
+                    <div class="loading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <span class="ms-2">Loading Data...</span>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="applicantsTable" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <!-- 테이블 헤더가 여기에 동적으로 추가됩니다 -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- 테이블 데이터가 여기에 동적으로 추가됩니다 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Modal -->
+    <div class="modal fade" id="saveModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Save Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="saveForm">
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" id="saveManagerName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" id="savePassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password Confirm</label>
+                            <input type="password" class="form-control" id="savePasswordConfirm" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveSettings()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Modal -->
+    <div class="modal fade" id="loadModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Load Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Saved Settings</label>
+                        <select class="form-select" id="savedSettings">
+                            <option value="">Select Saved Settings</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" id="loadPassword" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="loadSettings()">Load</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteSettings()">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script>
+        let customQuestions = [];
+        let selectedQuestions = [];
+        let emptyColumnCount = 0;
+        let customBuilderFields = [];
+        let currentSettingId = null;
+        let currentManagerName = "";
+
+        // 기본 컬럼 정의
+        const defaultColumns = [
+            { id: 'phoneNumber', content: '연락처', isDefault: true },
+            { id: 'email', content: '이메일', isDefault: true },
+            { id: 'appliedAt', content: '지원일', isDefault: true }
+        ];
+
+        // 커스텀 컬럼 템플릿 정의
+        const customColumnTemplates = {
+            personalInfo: {
+                name: '개인정보',
+                fields: [0, 4, 6], // 커스텀 답변의 인덱스
+                formatter: function(answers) {
+                    if (!answers || !Array.isArray(answers)) return '';
+                    
+                    const birthDate = formatDate(getCustomAnswer(answers, 0));
+                    const employmentStatus = getCustomAnswer(answers, 4);
+                    const currentJob = getCustomAnswer(answers, 6);
+                    
+                    return `[생년월일]
+- ${birthDate}
+
+[재직 상태]
+- ${employmentStatus}
+
+[현재 직무]
+- ${currentJob}`;
+                }
+            }
+        };
+
+        // 페이지 로드 시 실행
+        document.addEventListener('DOMContentLoaded', () => {
+            // Job ID 입력 시 버튼 활성화
+            document.getElementById('jobIdInput').addEventListener('input', function() {
+                document.getElementById('fetchData').disabled = !this.value.trim();
+            });
+
+            // 초기 Job ID 값이 있으면 버튼 활성화
+            if (document.getElementById('jobIdInput').value.trim()) {
+                document.getElementById('fetchData').disabled = false;
+            }
+
+            // 데이터 가져오기 버튼 클릭 이벤트
+            document.getElementById('fetchData').addEventListener('click', fetchApplicants);
+
+            // 선택된 질문 목록을 드래그 앤 드롭으로 정렬 가능하게 설정
+            new Sortable(document.getElementById('selectedQuestions'), {
+                animation: 150,
+                ghostClass: 'blue-background-class'
+            });
+
+            // 커스텀 빌더 필드 목록을 드래그 앤 드롭으로 정렬 가능하게 설정
+            new Sortable(document.getElementById('customBuilderFields'), {
+                animation: 150,
+                ghostClass: 'blue-background-class'
+            });
+        });
+
+        // 지원자 데이터 가져오기
+        async function fetchApplicants() {
+            const jobId = document.getElementById('jobIdInput').value.trim();
+            if (!jobId) return;
+
+            const loading = document.querySelector('.loading');
+            loading.style.display = 'block';
+
+            try {
+                const response = await fetch(`/api/applicants?jobId=${jobId}`);
+                const data = await response.json();
+                
+                if (data.results && data.results.length > 0) {
+                    // 첫 번째 지원자의 커스텀 질문을 가져와서 사용 가능한 질문 목록 생성
+                    const firstApplicant = data.results[0];
+                    if (firstApplicant.customAnswers) {
+                        console.log('Custom Answers:', firstApplicant.customAnswers);
+                        
+                        // 기존 커스텀 컬럼 정보 저장
+                        const existingCustomColumns = customQuestions.filter(q => q.isCustom);
+                        
+                        // 기본 컬럼과 커스텀 답변으로 customQuestions 초기화
+                        customQuestions = [
+                            ...defaultColumns,
+                            ...firstApplicant.customAnswers.map((answer, index) => ({
+                                id: index,
+                                content: answer.title || `질문 ${index + 1}`,
+                                isDefault: false
+                            }))
+                        ];
+                        
+                        // 기존 커스텀 컬럼 정보 복원
+                        customQuestions = [...customQuestions, ...existingCustomColumns];
+                        
+                        console.log('업데이트된 customQuestions:', customQuestions);
+                        updateAvailableQuestions();
+                        updateAvailableFields();
+                    }
+                    displayApplicants(data.results);
+                }
+            } catch (error) {
+                console.error('데이터를 가져오는데 실패했습니다:', error);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        // 사용 가능한 필드 목록 업데이트
+        function updateAvailableFields() {
+            const container = document.getElementById('availableFields');
+            container.innerHTML = '';
+            
+            customQuestions.forEach(question => {
+                if (!customBuilderFields.find(q => q.id === question.id)) {
+                    const div = document.createElement('div');
+                    div.className = 'question-item';
+                    div.textContent = question.content;
+                    div.onclick = () => addToCustomBuilder(question);
+                    container.appendChild(div);
+                }
+            });
+        }
+
+        // 커스텀 빌더에 필드 추가
+        function addToCustomBuilder(question) {
+            if (question) {
+                customBuilderFields.push(question);
+            } else {
+                const selected = document.querySelectorAll('#availableFields .question-item.selected');
+                selected.forEach(item => {
+                    const question = customQuestions.find(q => q.content === item.textContent);
+                    if (question) {
+                        customBuilderFields.push(question);
+                    }
+                });
+            }
+            updateAvailableFields();
+            updateCustomBuilderFields();
+        }
+
+        // 커스텀 빌더에서 필드 제거
+        function removeFromCustomBuilder(question) {
+            if (question) {
+                customBuilderFields = customBuilderFields.filter(q => q.id !== question.id);
+            } else {
+                const selected = document.querySelectorAll('#customBuilderFields .question-item.selected');
+                selected.forEach(item => {
+                    const question = customBuilderFields.find(q => q.content === item.textContent);
+                    if (question) {
+                        customBuilderFields = customBuilderFields.filter(q => q.id !== question.id);
+                    }
+                });
+            }
+            updateAvailableFields();
+            updateCustomBuilderFields();
+        }
+
+        // 커스텀 빌더 필드 목록 업데이트
+        function updateCustomBuilderFields() {
+            const container = document.getElementById('customBuilderFields');
+            container.innerHTML = '';
+            
+            customBuilderFields.forEach(question => {
+                const div = document.createElement('div');
+                div.className = 'question-item';
+                div.textContent = question.content;
+                div.onclick = () => removeFromCustomBuilder(question);
+                container.appendChild(div);
+            });
+        }
+
+        // 커스텀 컬럼 생성
+        function createCustomColumn() {
+            const columnName = document.getElementById('customColumnName').value.trim();
+            if (!columnName || customBuilderFields.length === 0) return;
+
+            const customColumn = {
+                id: `custom_${Date.now()}`,
+                content: columnName,
+                isCustom: true,
+                fields: customBuilderFields.map(f => ({
+                    id: f.id,
+                    content: f.content,
+                    isDefault: f.isDefault
+                })),
+                formatter: function(answers, applicant) {
+                    if (!this.fields || this.fields.length === 0) return '';
+                    
+                    let result = '';
+                    this.fields.forEach(field => {
+                        let content = '답변 없음';
+                        
+                        if (field.isDefault) {
+                            // 기본 컬럼 처리
+                            switch(field.id) {
+                                case 'phoneNumber':
+                                    content = formatPhoneNumber(applicant.phoneNumber || '');
+                                    break;
+                                case 'email':
+                                    content = applicant.email || '';
+                                    break;
+                                case 'appliedAt':
+                                    content = formatDate(applicant.appliedAt || '');
+                                    break;
+                                case 'birthday':
+                                    content = formatDate(applicant.birthday || '');
+                                    break;
+                            }
+                        } else {
+                            // 커스텀 답변 처리
+                            const answer = answers[field.id];
+                            if (answer) {
+                                // 생년월일 필드인 경우 날짜 포맷팅 적용
+                                if (field.content === '생년월일') {
+                                    content = formatDate(answer.content || '');
+                                } else {
+                                    content = answer.content || '답변 없음';
+                                }
+                            } else {
+                                content = '답변 없음';
+                            }
+                        }
+                        
+                        result += `[${field.content}]\n- ${content}\n\n`;
+                    });
+                    
+                    return result.trim();
+                }
+            };
+
+            console.log('생성된 커스텀 컬럼:', customColumn);
+            customQuestions.push(customColumn);
+            updateAvailableQuestions();
+            
+            // 커스텀 빌더 초기화
+            customBuilderFields = [];
+            document.getElementById('customColumnName').value = '';
+            updateAvailableFields();
+            updateCustomBuilderFields();
+        }
+
+        // 커스텀 답변 가져오기
+        function getCustomAnswer(answers, index) {
+            if (!answers || !Array.isArray(answers)) return '';
+            const answer = answers[index];
+            return answer ? (answer.content || '') : '';
+        }
+
+        // 사용 가능한 질문 목록 업데이트
+        function updateAvailableQuestions() {
+            const container = document.getElementById('availableQuestions');
+            container.innerHTML = '';
+            
+            customQuestions.forEach(question => {
+                if (!selectedQuestions.find(q => q.id === question.id)) {
+                    const div = document.createElement('div');
+                    div.className = 'question-item';
+                    div.textContent = question.content;
+                    div.onclick = () => moveToSelected(question);
+                    container.appendChild(div);
+                }
+            });
+        }
+
+        // 여백 컬럼 추가 함수
+        function addEmptyColumn() {
+            const emptyColumn = {
+                id: `empty_${emptyColumnCount++}`,
+                content: 'Empty',
+                isEmpty: true
+            };
+            selectedQuestions.push(emptyColumn);
+            updateSelectedQuestions();
+        }
+
+        // 선택된 질문 목록 업데이트
+        function updateSelectedQuestions() {
+            const container = document.getElementById('selectedQuestions');
+            container.innerHTML = '';
+            
+            selectedQuestions.forEach(question => {
+                const div = document.createElement('div');
+                div.className = 'selected-question-item';
+                div.textContent = question.content;
+                div.onclick = () => moveToAvailable(question);  // 모든 항목에 클릭 이벤트 추가
+                container.appendChild(div);
+            });
+        }
+
+        // 질문을 선택된 목록으로 이동
+        function moveToSelected(question) {
+            if (question) {
+                selectedQuestions.push(question);
+            } else {
+                const selected = document.querySelectorAll('#availableQuestions .question-item.selected');
+                selected.forEach(item => {
+                    const question = customQuestions.find(q => q.content === item.textContent);
+                    if (question) {
+                        selectedQuestions.push(question);
+                    }
+                });
+            }
+            updateAvailableQuestions();
+            updateSelectedQuestions();
+        }
+
+        // 질문을 사용 가능한 목록으로 이동
+        function moveToAvailable(question) {
+            if (question) {
+                selectedQuestions = selectedQuestions.filter(q => q.id !== question.id);
+            } else {
+                const selected = document.querySelectorAll('#selectedQuestions .selected-question-item.selected');
+                selected.forEach(item => {
+                    const question = selectedQuestions.find(q => q.content === item.textContent);
+                    if (question) {
+                        selectedQuestions = selectedQuestions.filter(q => q.id !== question.id);
+                    }
+                });
+            }
+            updateAvailableQuestions();
+            updateSelectedQuestions();
+        }
+
+        // 지원자 데이터 표시
+        function displayApplicants(applicants) {
+            const table = document.getElementById('applicantsTable');
+            const thead = table.querySelector('thead tr');
+            const tbody = table.querySelector('tbody');
+            
+            // 지원자 수 업데이트
+            document.getElementById('totalApplicants').textContent = applicants.length;
+            
+            // 테이블 초기화
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
+
+            // 이름 컬럼 추가 (고정)
+            const columns = [
+                { id: 'name', label: '성명', isFixed: true }
+            ];
+
+            // 선택된 커스텀 질문 컬럼 추가
+            selectedQuestions.forEach(question => {
+                console.log('처리할 컬럼:', question);
+                
+                if (question.isEmpty) {
+                    columns.push({
+                        id: question.id,
+                        label: 'Empty',
+                        isEmpty: true
+                    });
+                } else if (question.isCustom) {
+                    // 커스텀 컬럼인 경우 customQuestions에서 해당 컬럼 찾기
+                    const customColumn = customQuestions.find(q => q.id === question.id);
+                    console.log('찾은 커스텀 컬럼:', customColumn);
+                    
+                    if (customColumn) {
+                        columns.push({
+                            id: customColumn.id,
+                            label: customColumn.content,
+                            isCustom: true,
+                            formatter: customColumn.formatter,
+                            fields: customColumn.fields
+                        });
+                    } else {
+                        console.warn('커스텀 컬럼을 찾을 수 없음:', question);
+                    }
+                } else {
+                    columns.push({
+                        id: question.id,
+                        label: question.content,
+                        isCustom: false
+                    });
+                }
+            });
+
+            console.log('생성된 모든 컬럼:', columns);
+
+            // 헤더 생성
+            columns.forEach(column => {
+                const th = document.createElement('th');
+                th.textContent = column.label;
+                thead.appendChild(th);
+            });
+
+            // 데이터 행 생성
+            applicants.forEach(applicant => {
+                const tr = document.createElement('tr');
+                
+                columns.forEach(column => {
+                    const td = document.createElement('td');
+                    
+                    if (column.isFixed) {
+                        // 이름 컬럼 처리
+                        const name = applicant.name || '';
+                        const applicantId = applicant.id || '';
+                        const recruitmentId = document.getElementById('jobIdInput').value.trim();
+                        
+                        if (applicantId) {
+                            const resumeUrl = `https://app.ninehire.com/LFD8cXm5/recruitment/${recruitmentId}/applicants?applicantProgressId=${applicantId}`;
+                            const link = document.createElement('a');
+                            link.href = resumeUrl;
+                            link.textContent = name;
+                            link.target = '_blank';
+                            td.appendChild(link);
+                        } else {
+                            td.textContent = name;
+                        }
+                    } else if (column.isEmpty) {
+                        // 여백 컬럼 처리
+                        td.textContent = '';
+                    } else if (column.isCustom) {
+                        // 커스텀 컬럼 처리
+                        console.log('커스텀 컬럼 데이터 처리:', {
+                            column: column,
+                            applicant: applicant,
+                            customAnswers: applicant.customAnswers
+                        });
+                        
+                        if (column.formatter) {
+                            const formattedText = column.formatter.call(column, applicant.customAnswers || [], applicant);
+                            console.log('포맷된 텍스트:', formattedText);
+                            td.innerHTML = formattedText.replace(/\n/g, '<br>');
+                        } else {
+                            const answer = applicant.customAnswers?.[column.id]?.content || '';
+                            td.textContent = answer;
+                        }
+                    } else {
+                        // 기본 컬럼 처리
+                        if (column.id === 'phoneNumber') {
+                            td.textContent = formatPhoneNumber(applicant.phoneNumber || '');
+                        } else if (column.id === 'email') {
+                            td.textContent = applicant.email || '';
+                        } else if (column.id === 'appliedAt') {
+                            const date = formatDate(applicant.appliedAt || '');
+                            console.log('지원일 포맷팅:', { original: applicant.appliedAt, formatted: date });
+                            td.textContent = date;
+                        } else if (column.id === 'birthday') {
+                            const date = formatDate(applicant.birthday || '');
+                            console.log('생년월일 포맷팅:', { original: applicant.birthday, formatted: date });
+                            td.textContent = date;
+                        } else {
+                            // 커스텀 답변 처리
+                            const customAnswer = applicant.customAnswers?.[column.id];
+                            if (customAnswer) {
+                                if (column.id === 0) { // 생년월일 필드인 경우
+                                    const date = formatDate(customAnswer.content || '');
+                                    console.log('생년월일 커스텀 답변 포맷팅:', { original: customAnswer.content, formatted: date });
+                                    td.textContent = date;
+                                } else {
+                                    td.textContent = customAnswer.content || '';
+                                }
+                            } else {
+                                td.textContent = applicant[column.id] || '';
+                            }
+                        }
+                    }
+                    
+                    tr.appendChild(td);
+                });
+                
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 전화번호 포맷팅
+        function formatPhoneNumber(phone) {
+            if (!phone) return '';
+            phone = phone.replace(/-/g, '').replace(/ /g, '');
+            if (phone.length === 11) {
+                return phone.slice(0, 3) + '-' + phone.slice(3, 7) + '-' + phone.slice(7);
+            }
+            return phone;
+        }
+
+        // 날짜 포맷팅
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            try {
+                console.log('포맷팅할 날짜:', dateStr);
+                
+                // ISO 문자열에서 날짜 부분만 추출
+                const datePart = dateStr.split('T')[0];
+                console.log('추출된 날짜 부분:', datePart);
+                
+                const [year, month, day] = datePart.split('-');
+                console.log('분리된 날짜:', { year, month, day });
+                
+                if (!year || !month || !day) {
+                    console.log('날짜 형식이 올바르지 않음');
+                    return dateStr;
+                }
+                
+                const formattedDate = `${year}. ${month}. ${day}`;
+                console.log('포맷팅된 날짜:', formattedDate);
+                return formattedDate;
+            } catch (e) {
+                console.error('날짜 포맷팅 오류:', e);
+                return dateStr;
+            }
+        }
+
+        // 설정 저장 모달 열기
+        function openSaveModal() {
+            const jobId = document.getElementById('jobIdInput').value.trim();
+            if (!jobId) {
+                alert('Please enter the job ID.');
+                return;
+            }
+
+            // 현재 설정 ID가 있으면 바로 저장
+            if (currentSettingId) {
+                saveSettingsWithId();
+                return;
+            }
+
+            // 새로운 설정 저장 시 모달 표시
+            const saveModal = new bootstrap.Modal(document.getElementById('saveModal'));
+            saveModal.show();
+        }
+
+        // ID로 설정 저장
+        async function saveSettingsWithId() {
+            // 커스텀 컬럼 정보 수집
+            const customColumns = customQuestions.filter(q => q.isCustom).map(q => ({
+                id: q.id,
+                content: q.content,
+                fields: q.fields,
+                formatter: q.formatter.toString()
+            }));
+
+            // 선택된 질문 정보 수집
+            const selectedQuestionsData = selectedQuestions.map(q => ({
+                id: q.id,
+                content: q.content,
+                isCustom: q.isCustom || false,
+                isEmpty: q.isEmpty || false
+            }));
+            
+            const settings = {
+                jobId: document.getElementById('jobIdInput').value.trim(),
+                managerName: currentManagerName,  // 기존 담당자명 유지
+                password: "1234",  // 기본값 설정
+                selectedQuestions: selectedQuestionsData,
+                customQuestions: customQuestions,
+                customColumns: customColumns,
+                id: currentSettingId
+            };
+            
+            try {
+                const response = await fetch('/api/save-settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(settings)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('설정이 저장되었습니다.');
+                } else {
+                    throw new Error(result.error || '저장 실패');
+                }
+            } catch (error) {
+                console.error('설정 저장에 실패했습니다:', error);
+                alert(error.message || '설정 저장에 실패했습니다.');
+            }
+        }
+
+        // 설정 저장
+        async function saveSettings() {
+            const managerName = document.getElementById('saveManagerName').value.trim();
+            const password = document.getElementById('savePassword').value;
+            const passwordConfirm = document.getElementById('savePasswordConfirm').value;
+            
+            if (!managerName || !password || !passwordConfirm) {
+                alert('Please enter all fields.');
+                return;
+            }
+            
+            if (password !== passwordConfirm) {
+                alert('Password does not match.');
+                return;
+            }
+
+            // 커스텀 컬럼 정보 수집
+            const customColumns = customQuestions.filter(q => q.isCustom).map(q => {
+                console.log('저장할 커스텀 컬럼:', q);  // 저장 전 커스텀 컬럼 로그
+                return {
+                    id: q.id,
+                    content: q.content,
+                    fields: q.fields,
+                    formatter: q.formatter.toString()
+                };
+            });
+            console.log('저장할 모든 커스텀 컬럼:', customColumns);  // 저장할 모든 커스텀 컬럼 로그
+
+            // 선택된 질문 정보 수집
+            const selectedQuestionsData = selectedQuestions.map(q => ({
+                id: q.id,
+                content: q.content,
+                isCustom: q.isCustom || false,
+                isEmpty: q.isEmpty || false
+            }));
+            
+            const settings = {
+                jobId: document.getElementById('jobIdInput').value.trim(),
+                managerName,
+                password,
+                selectedQuestions: selectedQuestionsData,
+                customQuestions: customQuestions,
+                customColumns: customColumns
+            };
+            
+            console.log('저장할 전체 설정:', settings);  // 저장할 전체 설정 로그
+            
+            try {
+                const response = await fetch('/api/save-settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(settings)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    if (result.id) {
+                        currentSettingId = result.id;
+                    }
+                    alert('설정이 저장되었습니다.');
+                    bootstrap.Modal.getInstance(document.getElementById('saveModal')).hide();
+                } else {
+                    throw new Error(result.error || '저장 실패');
+                }
+            } catch (error) {
+                console.error('설정 저장에 실패했습니다:', error);
+                alert(error.message || '설정 저장에 실패했습니다.');
+            }
+        }
+
+        // 설정 불러오기
+        async function openLoadModal() {
+            try {
+                const response = await fetch('/api/saved-settings');
+                const settings = await response.json();
+                
+                const select = document.getElementById('savedSettings');
+                select.innerHTML = '<option value="">Select Saved Settings</option>';
+                
+                settings.forEach(setting => {
+                    const option = document.createElement('option');
+                    option.value = setting.id;
+                    option.textContent = `${setting.managerName} (${setting.jobId})`;
+                    select.appendChild(option);
+                });
+                
+                const loadModal = new bootstrap.Modal(document.getElementById('loadModal'));
+                loadModal.show();
+            } catch (error) {
+                console.error('설정 목록을 불러오는데 실패했습니다:', error);
+                alert('설정 목록을 불러오는데 실패했습니다.');
+            }
+        }
+
+        // 설정 불러오기
+        async function loadSettings() {
+            const settingId = document.getElementById('savedSettings').value;
+            const password = document.getElementById('loadPassword').value;
+            
+            if (!settingId || !password) {
+                alert('Please enter the settings and password.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/load-settings/${settingId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password })
+                });
+                
+                const result = await response.json();
+                console.log('불러온 전체 설정:', result);
+                
+                if (response.ok) {
+                    // 설정 적용
+                    document.getElementById('jobIdInput').value = result.jobId;
+                    selectedQuestions = result.selectedQuestions;
+                    customQuestions = result.customQuestions;
+
+                    // 커스텀 컬럼 복원
+                    if (result.customColumns && result.customColumns.length > 0) {
+                        console.log('불러온 커스텀 컬럼:', result.customColumns);
+                        
+                        result.customColumns.forEach(column => {
+                            console.log('복원할 커스텀 컬럼:', column);
+                            
+                            // 기존 커스텀 컬럼 제거
+                            customQuestions = customQuestions.filter(q => q.id !== column.id);
+                            
+                            // 새로운 커스텀 컬럼 추가
+                            const newColumn = {
+                                ...column,
+                                isCustom: true,
+                                formatter: function(answers, applicant) {
+                                    console.log('포매터 실행:', {
+                                        answers: answers,
+                                        applicant: applicant,
+                                        fields: this.fields
+                                    });
+                                    
+                                    if (!this.fields || this.fields.length === 0) return '';
+                                    
+                                    let result = '';
+                                    this.fields.forEach(field => {
+                                        let content = '답변 없음';
+                                        
+                                        if (field.isDefault) {
+                                            // 기본 컬럼 처리
+                                            switch(field.id) {
+                                                case 'phoneNumber':
+                                                    content = formatPhoneNumber(applicant.phoneNumber || '');
+                                                    break;
+                                                case 'email':
+                                                    content = applicant.email || '';
+                                                    break;
+                                                case 'appliedAt':
+                                                    content = formatDate(applicant.appliedAt || '');
+                                                    break;
+                                                case 'birthday':
+                                                    content = formatDate(applicant.birthday || '');
+                                                    break;
+                                            }
+                                        } else {
+                                            // 커스텀 답변 처리
+                                            const answer = answers[field.id];
+                                            content = answer ? (answer.content || '답변 없음') : '답변 없음';
+                                        }
+                                        
+                                        result += `[${field.content}]\n- ${content}\n\n`;
+                                    });
+                                    
+                                    console.log('포매터 결과:', result);
+                                    return result.trim();
+                                }
+                            };
+                            console.log('생성된 새 커스텀 컬럼:', newColumn);
+                            customQuestions.push(newColumn);
+                        });
+                    }
+                    
+                    console.log('최종 customQuestions:', customQuestions);
+                    
+                    // UI 업데이트
+                    updateAvailableQuestions();
+                    updateSelectedQuestions();
+                    updateAvailableFields();
+                    
+                    // Data Load 버튼 활성화
+                    document.getElementById('fetchData').disabled = false;
+                    
+                    // 현재 설정 ID와 담당자명 저장
+                    currentSettingId = settingId;
+                    currentManagerName = result.managerName;
+                    
+                    alert('설정을 불러왔습니다.');
+                    bootstrap.Modal.getInstance(document.getElementById('loadModal')).hide();
+                } else {
+                    throw new Error(result.error || '비밀번호가 일치하지 않습니다.');
+                }
+            } catch (error) {
+                console.error('설정 불러오기에 실패했습니다:', error);
+                alert(error.message || '설정 불러오기에 실패했습니다.');
+            }
+        }
+
+        // 설정 삭제
+        async function deleteSettings() {
+            const settingId = document.getElementById('savedSettings').value;
+            const password = document.getElementById('loadPassword').value;
+            
+            if (!settingId || !password) {
+                alert('Please enter the settings and password.');
+                return;
+            }
+            
+            if (!confirm('Are you sure you want to delete this setting?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/delete-settings/${settingId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password })
+                });
+                
+                if (response.ok) {
+                    alert('Setting deleted successfully.');
+                    bootstrap.Modal.getInstance(document.getElementById('loadModal')).hide();
+                    openLoadModal(); // 목록 새로고침
+                } else {
+                    throw new Error('Password does not match.');
+                }
+            } catch (error) {
+                console.error('Failed to delete setting:', error);
+                alert(error.message || 'Failed to delete setting.');
+            }
+        }
+    </script>
+</body>
+</html> 
